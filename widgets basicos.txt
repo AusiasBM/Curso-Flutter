@@ -1,0 +1,107 @@
+
+// Widget TEXT -------------------------------------------------------------------------------------------------------
+
+El widget de texto muestra una cadena de texto con un solo estilo. La cadena puede dividirse en varias líneas o 
+todas pueden mostrarse en la misma línea dependiendo de las restricciones de diseño.
+
+El argumento de estilo es opcional. Cuando se omite, el texto usará el estilo del DefaultTextStyle adjunto más cercano. 
+Si la propiedad TextStyle.inherit del estilo dado es verdadera (el valor predeterminado), 
+el estilo dado se fusionará con el DefaultTextStyle adjunto más cercano . Este comportamiento de fusión es útil, 
+por ejemplo, para poner el texto en negrita mientras se usa la familia y el tamaño de fuente predeterminados.
+
+        Text(
+            'Hello, $_name! How are you?',
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.bold),
+        )
+
+Usando el constructor Text.rich , el widget Text puede mostrar un párrafo con TextSpan s de estilo diferente . 
+La muestra que sigue muestra "Hola mundo hermoso" con diferentes estilos para cada palabra.
+
+        const Text.rich(
+        TextSpan(
+            text: 'Hello', // default text style
+            children: <TextSpan>[
+            TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
+            TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+        ),
+        )
+
+// Widget ROW -------------------------------------------------------------------------------------------------------
+
+Un widget que muestra a sus hijos en una matriz horizontal.
+
+Para hacer que un niño se expanda para llenar el espacio horizontal disponible, envuélvalo en un widget expandido .
+
+El widget Row no se desplaza (y en general se considera un error tener más hijos en una fila de los que caben en la sala disponible). 
+Si tiene una línea de widgets y desea que puedan desplazarse si no hay espacio suficiente, considere usar un ListView .
+
+Para una variante vertical, vea Columna .
+
+Si solo tiene un hijo, considere usar Alinear o Centrar para colocar al hijo.
+
+        Row(
+        children: <Widget>[
+            Expanded(
+            child: Text('Deliver features faster', textAlign: TextAlign.center),
+            ),
+            Expanded(
+            child: Text('Craft beautiful UIs', textAlign: TextAlign.center),
+            ),
+            Expanded(
+            child: FittedBox(
+                fit: BoxFit.contain, // otherwise the logo will be tiny
+                child: const FlutterLogo(),
+            ),
+            ),
+        ],
+        )
+
+Solución de problemas
+¿Por qué mi fila tiene una franja de advertencia amarilla y negra?
+Si los contenidos no flexibles de la fila (aquellos que no están envueltos en widgets expandidos o flexibles ) 
+son juntos más anchos que la fila en sí, entonces se dice que la fila se ha desbordado. Cuando una fila se desborda, 
+la fila no tiene espacio restante para compartir entre sus elementos secundarios expandidos y flexibles . 
+La fila informa esto dibujando un cuadro de advertencia de rayas amarillas y negras en el borde que se desborda. 
+Si hay espacio en el exterior de la fila, la cantidad de desbordamiento se imprime en letras rojas.
+
+Tiempo de cuentos
+Supongamos, por ejemplo, que tiene este código:
+
+        Row(
+            children: <Widget>[
+                const FlutterLogo(),
+                const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+                const Icon(Icons.sentiment_very_satisfied),
+            ],
+        )
+
+La fila primero le pide a su primer hijo, el FlutterLogo , que diseñe , en cualquier tamaño que desee el logotipo. 
+El logotipo es amigable y felizmente decide tener 24 píxeles a un lado. Esto deja mucho espacio para el próximo niño. 
+La fila luego le pide al siguiente niño, el texto, que diseñe, en cualquier tamaño que considere mejor.
+
+En este punto, el texto, sin saber qué tan ancho es demasiado ancho, dice "Ok, voy a ser thiiiiiiiiiiiiiiiiiiiis wide", 
+y va mucho más allá del espacio que la fila tiene disponible, no se ajusta. La fila responde: "¡Eso no es justo, 
+ahora no tengo más espacio disponible para mis otros hijos!", Y se enoja y brota una franja amarilla y negra.
+
+La solución es envolver al segundo hijo en un widget expandido , que le dice a la fila que al niño se le debe dar el espacio restante:
+
+        Row(
+        children: <Widget>[
+            const FlutterLogo(),
+            const Expanded(
+            child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+            ),
+            const Icon(Icons.sentiment_very_satisfied),
+        ],
+        )
+
+Ahora, la fila primero le pide al logotipo que se diseñe, y luego le pide al icono que lo haga . 
+El Icon , al igual que el logotipo, se complace en tener un tamaño razonable (también 24 píxeles, 
+no por coincidencia, ya que tanto FlutterLogo como Icon respetan el IconTheme ambiental ). 
+Esto deja algo de espacio sobrante, y ahora la fila le dice al texto exactamente qué tan ancho debe ser: 
+el ancho exacto del espacio restante. El texto, ahora feliz de cumplir con una solicitud razonable, 
+envuelve el texto dentro de ese ancho, y termina con un párrafo dividido en varias líneas.
+
